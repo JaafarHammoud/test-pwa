@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Random Number PWA</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="manifest" href="manifest.json">
+    <meta name="theme-color" content="#4a90d9">
+    <link rel="apple-touch-icon" href="icon-192.png">
+    <script src="https://unpkg.com/htmx.org@1.9.10" integrity="sha384-D1Kt99CQMDuVetoL1lrYwg5t+9QdHe7NLX/SoJYkXDFfX37iInKRy5xLSi8nO7UC" crossorigin="anonymous"></script>
+</head>
+<body>
+    <nav class="navbar">
+        <div class="nav-brand">Random PWA</div>
+        <ul class="nav-menu">
+            <li><a href="#home" class="active">Home</a></li>
+            <li><a href="#generator">Generator</a></li>
+            <li><a href="#history">History</a></li>
+        </ul>
+    </nav>
+
+    <main class="container">
+        <section id="home" class="page active">
+            <h1>Welcome</h1>
+            <p>A simple PWA with HTMX</p>
+            <div class="card">
+                <h2>Quick Generate</h2>
+                <button class="btn-primary" 
+                        hx-on:click="this.textContent = 'Random: ' + Math.floor(Math.random() * 100) + 1">
+                    Generate Number
+                </button>
+            </div>
+        </section>
+
+        <section id="generator" class="page">
+            <h1>Number Generator</h1>
+            <div class="card">
+                <label for="min">Min:</label>
+                <input type="number" id="min" value="1" min="0">
+                <label for="max">Max:</label>
+                <input type="number" id="max" value="100" min="1">
+                <button class="btn-primary" 
+                        hx-on:click="generateNumber(this)">
+                    Generate Random
+                </button>
+                <div id="result" class="result-display">-</div>
+            </div>
+        </section>
+
+        <section id="history" class="page">
+            <h1>History</h1>
+            <div class="card">
+                <p>Your generated numbers will appear here:</p>
+                <ul id="history-list" class="history-list">
+                    <li class="empty-state">No numbers generated yet</li>
+                </ul>
+                <button class="btn-secondary" onclick="clearHistory()">Clear History</button>
+            </div>
+        </section>
+    </main>
+
+    <div id="install-banner" class="install-banner hidden">
+        <span>Install this app for a better experience!</span>
+        <button id="install-btn">Install</button>
+        <button id="dismiss-btn" onclick="dismissInstall()">Later</button>
+    </div>
+
+    <script src="app.js"></script>
+    <script>
+        function generateNumber(btn) {
+            const min = parseInt(document.getElementById('min').value) || 1;
+            const max = parseInt(document.getElementById('max').value) || 100;
+            const randomNum = Math.floor(Math.random() * (max - min + 1)) + min;
+            
+            document.getElementById('result').textContent = randomNum;
+            addToHistory(randomNum);
+        }
+
+        function addToHistory(num) {
+            const list = document.getElementById('history-list');
+            const empty = list.querySelector('.empty-state');
+            if (empty) empty.remove();
+            
+            const li = document.createElement('li');
+            li.textContent = num;
+            li.style.animation = 'slideIn 0.3s ease';
+            list.insertBefore(li, list.firstChild);
+            
+            if (list.children.length > 10) {
+                list.lastElementChild.remove();
+            }
+        }
+
+        function clearHistory() {
+            const list = document.getElementById('history-list');
+            list.innerHTML = '<li class="empty-state">No numbers generated yet</li>';
+        }
+
+        document.querySelectorAll('.nav-menu a').forEach(link => {
+            link.addEventListener('click', (e) => {
+                document.querySelectorAll('.nav-menu a').forEach(l => l.classList.remove('active'));
+                e.target.classList.add('active');
+                
+                const target = e.target.getAttribute('href').substring(1);
+                document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+                document.getElementById(target).classList.add('active');
+            });
+        });
+    </script>
+</body>
+</html>
